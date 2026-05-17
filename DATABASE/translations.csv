@@ -1,0 +1,29 @@
+key,en,pl
+shop,Shop POS,Sprzedaż
+pos,Point of Sale,Punkt sprzedaży
+step1,Step 1: Identify Customer,Krok 1: Zidentyfikuj klienta
+step1_ph,Enter Customer ID (4 digits),Wprowadź identyfikator klienta (4 cyfry)
+step2,Step 2: Select Items,Krok 2: Wybierz produkty
+step2_ph,Product Name,Nazwa Produktu
+step3,Step 3: Enter the quantity,Krok 3: Podaj ilość
+confirm_purch,Confirm Purchase,Potwierdź Zakup
+products,Products,Produkty
+product_man,Product Management,Zarządzanie Produktami
+product_price,Product Price (PLN):,Cena Produktu (PLN):
+product_amount,Initial Amount:,Ilość początkowa:
+add_product,Add Product,Dodaj Produkt
+rem_select,Remove Selected,Usuń Zaznaczone
+customers,Customers,Klienci
+customer_man,Customer Management,Zarządzanie Klientami
+per_data,Personal Data:,Dane osobowe:
+full_name,Full Name,Imię i Nazwisko
+email,E-mail Address,Adres e-mail
+phone,Phone Number,Numer telefonu
+addr_data,Address Data:,Dane adresowe:
+street,Street,Ulica
+city,City,Miasto
+country,Country,Państwo
+reg_customer,Register Customer,Zarejestruj Klienta
+settings,Settings,Ustawienia
+select_lang,Select Application Language:,Wybierz język aplikacji:
+restart_req,"Please restart the application, to apply the language change.","Uruchom aplikację ponownie, aby zastosować zmianę języka."
