@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 
-import globals as gl
-import manager_baz_danych
-import utils
+from frog_package import globals as gl
+from frog_package import manager_baz_danych
+from frog_package import utils
 
 def product_frame() -> pd.DataFrame:
     manager_baz_danych.init_databases()

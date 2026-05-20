@@ -1,7 +1,9 @@
 import os
 
 
-DB_DIR = '../DATABASE'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_DIR = os.path.join(BASE_DIR, 'DATABASE')
+
 PROD_FILE = os.path.join(DB_DIR, 'products.xlsx')
 CUST_FILE = os.path.join(DB_DIR, 'customer.csv')
 ADDR_FILE = os.path.join(DB_DIR, 'address.csv')

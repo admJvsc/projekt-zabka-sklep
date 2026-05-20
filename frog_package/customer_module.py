@@ -1,7 +1,7 @@
 import pandas as pd
 
-import product_module
-import utils
+from frog_package import product_module
+from frog_package import utils
 
 def update_customer(customer_id: str):
     customer_frame: pd.DataFrame = utils.customer_frame()

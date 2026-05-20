@@ -2,7 +2,7 @@ from datetime import date
 
 import pandas as pd
 
-import globals as gl
+from frog_package import globals as gl
 
 class columns:
     customer: list[str] = ["ID", "NAME", "E-MAIL", "PHONE", "CREATED", "UPDATED"]

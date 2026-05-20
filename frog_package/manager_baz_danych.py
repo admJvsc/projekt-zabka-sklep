@@ -14,7 +14,7 @@ Author: Adam Jaszcz.
 import os
 from datetime import datetime
 import pandas as pd
-from globals import *
+from frog_package.globals import *
 
 def init_databases():
     """

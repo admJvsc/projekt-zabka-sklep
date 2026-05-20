@@ -1,4 +1,4 @@
-from gui import run_application
+from frog_package.gui import run_application
 
 
 def __main__():
