@@ -74,7 +74,7 @@ def process_purchase_in_db(customer_id: str, product_name: str, quantity: int) -
     if not utils.has_customer(customer_frame, normalized_customer_id):
         return 1
 
-    purchase_status: int = product_module.purchase_product(product_name, quantity)
+    purchase_status: int = product_module.purchase_product(product_name, quantity, normalized_customer_id)
 
     if purchase_status != 0:
         return purchase_status
