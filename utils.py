@@ -7,10 +7,8 @@ import globals as gl
 class columns:
     customer: list[str] = ["ID", "NAME", "E-MAIL", "PHONE", "CREATED", "UPDATED"]
     address: list[str] = ["ID", "STREET", "CITY", "COUNTRY"]
-    product: list[str] = ["ID", "NAME", "PRICE", "NO_PACKAGES_AVAILABLE", "UPDATED"]
+    product: list[str] = ["ID", "NAME", "PRICE", "AMOUNT", "UPDATED"]
 
-class legacy_columns:
-    product_amount: str = "AMOUNT"
 
 def today() -> str:
     return date.today().isoformat()

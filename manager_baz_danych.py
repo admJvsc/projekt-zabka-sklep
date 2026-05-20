@@ -24,17 +24,16 @@ def init_databases():
     if not os.path.exists(DB_DIR):
         os.makedirs(DB_DIR)
 
-def dodaj_produkt_do_bazy(prod_id, prod_nazwa, liczba_opakowan, update_date=None):
+def dodaj_produkt_do_bazy(prod_id, prod_nazwa, cena, liczba_opakowan, update_date=None):
     """
-        Dodaje nowy produkt do pliku Excel zgodnie z Twoją strukturą kolumn.
-        Kolumny: ID, PRODUCT, NO_PACKAGES_AVAILABLE, UPDATE
-
-        Obsługa wyjątków: Zabezpieczenie przed błędami formatu liczb oraz blokadą pliku.
+        Dodaje nowy produkt do pliku Excel.
+        Kolumny: ID, NAME, PRICE, AMOUNT, UPDATED
     """
     init_databases()
     try:
         p_id = str(prod_id).strip()
         p_name = str(prod_nazwa).strip().upper()
+        p_cena = str(cena).strip()
         p_liczba = int(liczba_opakowan)
         p_date = str(update_date) if update_date else datetime.now().strftime("%Y-%m-%d")
 
@@ -50,9 +49,10 @@ def dodaj_produkt_do_bazy(prod_id, prod_nazwa, liczba_opakowan, update_date=None
 
         nowy_wiersz = pd.DataFrame([{
             "ID": p_id,
-            "PRODUCT": p_name,
-            "NO_PACKAGES_AVAILABLE": p_liczba,
-            "UPDATE": p_date
+            "NAME": p_name,
+            "PRICE": p_cena,
+            "AMOUNT": p_liczba,
+            "UPDATED": p_date
         }])
 
         df = pd.concat([df, nowy_wiersz], ignore_index=True)
@@ -61,7 +61,7 @@ def dodaj_produkt_do_bazy(prod_id, prod_nazwa, liczba_opakowan, update_date=None
         return True
 
     except ValueError:
-        print("[BŁĄD] Niepoprawny format danych. Ilość pakietów musi być liczbą całkowitą.")
+        print("[BŁĄD] Niepoprawny format danych.")
         return False
     except PermissionError:
         print(f"[BŁĄD] Zamknij plik {PROD_FILE}. Jest otwarty w innym programie.")

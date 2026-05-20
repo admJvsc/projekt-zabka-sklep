@@ -6,6 +6,7 @@ import globals as gl
 import manager_baz_danych
 import utils
 
+
 def product_frame() -> pd.DataFrame:
     manager_baz_danych.init_databases()
 
@@ -14,13 +15,6 @@ def product_frame() -> pd.DataFrame:
 
     frame: pd.DataFrame = pd.read_excel(gl.PROD_FILE, dtype=str, keep_default_na=False)
 
-    rename_map: dict[str, str] = {
-        "PRODUCT": "NAME",
-        "UPDATE": "UPDATED",
-        utils.legacy_columns.product_amount: "NO_PACKAGES_AVAILABLE",
-    }
-
-    frame = frame.rename(columns=rename_map)
     return frame.reindex(columns=utils.columns.product, fill_value="").fillna("")
 
 def save_product_frame(frame: pd.DataFrame):
@@ -39,29 +33,41 @@ def get_all_products() -> list[tuple]:
         records.append((
             str(row["ID"]).strip(),
             str(row["NAME"]).strip(),
-            str(row["PRICE"]).strip(),
-            str(row["NO_PACKAGES_AVAILABLE"]).strip(),
+            str(row["PRICE"]).strip(),   # Dodana cena
+            str(row["AMOUNT"]).strip(),  # Zmienione na AMOUNT
             str(row["UPDATED"]).strip(),
         ))
 
     return records
 
-def purchase_product(product_name: str, quantity: int) -> bool:
+def purchase_product(product_name: str, quantity: int) -> int:
     products_frame: pd.DataFrame = product_frame()
     normalized_name: str = product_name.strip().upper()
 
     row_mask: pd.Series = products_frame["NAME"].astype(str).str.upper() == normalized_name
 
     if not row_mask.any():
-        return False
+        return 2
 
-    available_packages: int = int(products_frame.loc[row_mask, "NO_PACKAGES_AVAILABLE"].iloc[0] or 0)
+    available_packages: int = int(products_frame.loc[row_mask, "AMOUNT"].iloc[0] or 0)
 
     if quantity <= 0 or available_packages < quantity:
-        return False
+        return 3
 
-    products_frame.loc[row_mask, "NO_PACKAGES_AVAILABLE"] = str(available_packages - quantity)
+    products_frame.loc[row_mask, "AMOUNT"] = str(available_packages - quantity)
     products_frame.loc[row_mask, "UPDATED"] = utils.today()
 
     save_product_frame(products_frame)
-    return True
+    return 0
+
+
+def add_product_to_db(name: str, price: float, amount: int) -> tuple[str, str, str]:
+    products_frame: pd.DataFrame = product_frame()
+
+    new_id = next_product_id(products_frame)
+    updated_date = utils.today()
+
+    success = manager_baz_danych.dodaj_produkt_do_bazy(new_id, name, price, amount, updated_date)
+    if success:
+        return new_id, str(amount), updated_date
+    return "", "", ""

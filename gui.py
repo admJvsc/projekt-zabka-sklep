@@ -1,16 +1,20 @@
 import sys
 import os
+import ctypes #for app icon in Windows taskbar
 import pandas as pd
 import globals as gl
 import product_module
 import customer_module
+import manager_baz_danych
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTableWidgetItem
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem
 from PySide6.QtSvgWidgets import QSvgWidget
-from qfluentwidgets import (NavigationItemPosition, MessageBox,
-                            setTheme, Theme, MSFluentWindow, TitleLabel, LineEdit,
-                            PrimaryPushButton, PushButton, TableWidget,
-                            CaptionLabel, DoubleSpinBox, SpinBox, setThemeColor, ComboBox)
+from PySide6.QtGui import QIcon
+from qfluentwidgets import (NavigationItemPosition, MessageBox, MSFluentWindow,
+                            setTheme, Theme, setThemeColor, isDarkTheme, LineEdit,
+                            PrimaryPushButton, PushButton, HyperlinkButton, TableWidget,
+                            DoubleSpinBox, SpinBox, ComboBox, InfoBar, InfoBarPosition,
+                            TitleLabel, CaptionLabel, SubtitleLabel, BodyLabel)
 from qfluentwidgets import FluentIcon as FI
 
 
@@ -23,7 +27,7 @@ def load_language():
             if not lang_row.empty:
                 return str(lang_row.iloc[0, 1])
         except Exception as e:
-            print(f"Warning: Could not read settings: {e}")
+            print(f"[ERROR] Could not read settings: {e}")
     return 'en'
 
 def save_language(lang_code):
@@ -48,9 +52,9 @@ def load_translations():
                 translations['en'][key] = en_text.replace('\\n', '\n')
                 translations['pl'][key] = pl_text.replace('\\n', '\n')
         except Exception as e:
-            print(f"Warning: Error reading translations file: {e}")
+            print(f"[ERROR] Error reading translations file: {e}")
     else:
-        print(f"Warning: Translation file not found at {gl.LANG_FILE}")
+        print(f"[ERROR] Translation file not found at {gl.LANG_FILE}")
 
     return translations
 
@@ -83,23 +87,47 @@ def create_shopping_interface(parent=None):
     qty_input.setRange(1, 100)
 
     buy_btn = PrimaryPushButton(tr('confirm_purch'), widget, FI.SHOPPING_CART)
+    buy_btn.setEnabled(False)
+
+    def check_purchase_inputs():
+        has_cid = bool(cust_id_input.text().strip())
+        has_prod = bool(product_name.text().strip())
+
+        buy_btn.setEnabled(has_cid and has_prod)
+
+    cust_id_input.textChanged.connect(check_purchase_inputs)
+    product_name.textChanged.connect(check_purchase_inputs)
 
     def process_purchase():
-        cid = cust_id_input.text()
-        prod = product_name.text()
+        cid = cust_id_input.text().strip()
+        prod = product_name.text().strip()
         qty = qty_input.value()
 
         if cid and prod:
-            success = customer_module.process_purchase_in_db(cid, prod, qty)
+            status = customer_module.process_purchase_in_db(cid, prod, qty)
 
-            if success:
-                msg = MessageBox("Success", f"Purchased: {qty}x {prod} for ID: {cid}", widget)
+            if status == 0:
+                msg = MessageBox(tr('success'), f"{tr('purchased')}: {qty}x {prod} {tr('for')} ID: {cid}", widget)
+                msg.cancelButton.hide()
+                msg.yesButton.setText('OK')
                 msg.exec()
                 product_name.clear()
                 qty_input.setValue(1)
-            else:
-                msg = MessageBox("Error", f"Customer ID: {cid} not found!", widget)
-                msg.exec()
+            elif status == 1:
+                InfoBar.error(
+                    title=tr('error'), content=f"Nie znaleziono klienta o ID: {cid}",
+                    orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
+                )
+            elif status == 2:
+                InfoBar.error(
+                    title=tr('error'), content=f"Produkt '{prod}' nie istnieje w bazie!",
+                    orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
+                )
+            elif status == 3:
+                InfoBar.error(
+                    title=tr('error'), content=f"Brak wystarczającej ilości towaru '{prod}'!",
+                    orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
+                )
 
     buy_btn.clicked.connect(process_purchase)
 
@@ -140,12 +168,20 @@ def create_product_interface(parent=None):
     amount_input.setValue(100)
 
     add_btn = PrimaryPushButton(tr('add_product'), widget, FI.ADD)
+    add_btn.setEnabled(False)
+
+    def check_product_inputs():
+        has_name = bool(name_input.text().strip())
+        add_btn.setEnabled(has_name)
+
+    name_input.textChanged.connect(check_product_inputs)
 
     table = TableWidget(widget)
     table.setColumnCount(5)
     table.setHorizontalHeaderLabels(['ID', 'Name', 'Price', 'Amount', 'Updated'])
 
     def load_products_to_table():
+        table.setRowCount(0)
         products = product_module.get_all_products()
         for row_data in products:
             row = table.rowCount()
@@ -163,25 +199,36 @@ def create_product_interface(parent=None):
         amount = amount_input.value()
 
         if name:
-            product_id, amount, updated = product_module.add_product_to_db(name, price, amount)
+            product_id, final_amount, updated = product_module.add_product_to_db(name, price, amount)
 
-            row = table.rowCount()
-            table.insertRow(row)
-            table.setItem(row, 0, QTableWidgetItem(product_id))
-            table.setItem(row, 1, QTableWidgetItem(name))
-            table.setItem(row, 2, QTableWidgetItem(str(price)))
-            table.setItem(row, 3, QTableWidgetItem(str(amount)))
-            table.setItem(row, 4, QTableWidgetItem(updated))
+            if product_id:
+                row = table.rowCount()
+                table.insertRow(row)
+                table.setItem(row, 0, QTableWidgetItem(product_id))
+                table.setItem(row, 1, QTableWidgetItem(name))
+                table.setItem(row, 2, QTableWidgetItem(str(price)))
+                table.setItem(row, 3, QTableWidgetItem(str(final_amount)))
+                table.setItem(row, 4, QTableWidgetItem(updated))
 
-            name_input.clear()
-            amount_input.setValue(100)
+                name_input.clear()
+                amount_input.setValue(100)
+
+                InfoBar.success(
+                    title=tr('success'), content=f"Dodano produkt: {name}",
+                    orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=3000, parent=widget
+                )
+            else:
+                InfoBar.error(
+                    title=tr('error'), content="Nie udało się dodać produktu. Sprawdź plik bazy.",
+                    orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
+                )
 
     def remove_product():
         current_row = table.currentRow()
         if current_row >= 0 and current_row < table.rowCount():
             product_id = table.item(current_row, 0).text()
 
-            product_module.remove_product_from_db(product_id)
+            manager_baz_danych.usun_produkt_z_bazy(product_id)
             table.removeRow(current_row)
 
             table.clearSelection()
@@ -205,6 +252,12 @@ def create_product_interface(parent=None):
     layout.addWidget(table)
     layout.addWidget(remove_btn)
 
+    original_show_event = widget.showEvent
+    def on_show(event):
+        load_products_to_table()
+        original_show_event(event)
+    widget.showEvent = on_show
+
     return widget
 
 
@@ -219,18 +272,41 @@ def create_customer_interface(parent=None):
 
     customer_name = LineEdit()
     customer_name.setPlaceholderText(tr('full_name'))
+    customer_name.textChanged.connect(lambda: customer_name.setError(False))
     email_input = LineEdit()
     email_input.setPlaceholderText(tr('email'))
     phone_input = LineEdit()
     phone_input.setPlaceholderText(tr('phone'))
+    email_input.textChanged.connect(lambda: (email_input.setError(False), phone_input.setError(False)))
+    phone_input.textChanged.connect(lambda: (email_input.setError(False), phone_input.setError(False)))
     street_input = LineEdit()
     street_input.setPlaceholderText(tr('street'))
     city_input = LineEdit()
     city_input.setPlaceholderText(tr('city'))
     country_input = LineEdit()
     country_input.setPlaceholderText(tr('country'))
+    country_input.textChanged.connect(lambda: country_input.setError(False))
 
     reg_btn = PrimaryPushButton(tr('reg_customer'), widget, FI.ADD_TO)
+    reg_btn.setEnabled(False)
+
+    def check_customer_inputs():
+        has_any_text = bool(
+            customer_name.text().strip() or
+            email_input.text().strip() or
+            phone_input.text().strip() or
+            street_input.text().strip() or
+            city_input.text().strip() or
+            country_input.text().strip()
+        )
+        reg_btn.setEnabled(has_any_text)
+
+    customer_name.textChanged.connect(check_customer_inputs)
+    email_input.textChanged.connect(check_customer_inputs)
+    phone_input.textChanged.connect(check_customer_inputs)
+    street_input.textChanged.connect(check_customer_inputs)
+    city_input.textChanged.connect(check_customer_inputs)
+    country_input.textChanged.connect(check_customer_inputs)
 
     table = TableWidget(widget)
     table.setColumnCount(7)
@@ -249,16 +325,61 @@ def create_customer_interface(parent=None):
     remove_btn = PushButton(tr('rem_select'), widget, FI.DELETE)
 
     def register_customer():
-        name = customer_name.text()
-        email = email_input.text()
-        phone = phone_input.text()
-        street = street_input.text()
-        city = city_input.text()
-        country = country_input.text()
+        name = customer_name.text().strip()
+        email = email_input.text().strip()
+        phone = phone_input.text().strip()
+        street = street_input.text().strip()
+        city = city_input.text().strip()
+        country = country_input.text().strip()
 
-        if name:
-            customer_id = customer_module.register_customer_in_db(name, email, phone, street, city, country)
+        if not name or not country:
+            if not name:
+                customer_name.setError(True)
+            if not country:
+                country_input.setError(True)
 
+            InfoBar.warning(
+                title="Brakujące dane",
+                content="Wypełnij wymagane pola: Imię i nazwisko oraz Państwo.",
+                orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
+            )
+            return
+
+        if not email and not phone:
+            email_input.setError(True)
+            phone_input.setError(True)
+            InfoBar.warning(
+                title="Brak danych kontaktowych",
+                content="Podaj przynajmniej e-mail LUB numer telefonu.",
+                orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
+            )
+            return
+
+        if email and "@" not in email:
+            email_input.setError(True)
+            email_input.setFocus()
+            InfoBar.error(
+                title="Błędny format",
+                content="Adres e-mail musi zawierać znak '@'.",
+                orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
+            )
+            return
+
+        if phone:
+            clean_phone = phone.replace(" ", "").replace("+", "").replace("-", "")
+            if not clean_phone.isdigit():
+                phone_input.setError(True)
+                phone_input.setFocus()
+                InfoBar.error(
+                    title="Błędny format",
+                    content="Numer telefonu zawiera niedozwolone znaki.",
+                    orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
+                )
+                return
+
+        customer_id = customer_module.register_customer_in_db(name, email, phone, street, city, country)
+
+        if customer_id:
             row = table.rowCount()
             table.insertRow(row)
             table.setItem(row, 0, QTableWidgetItem(customer_id))
@@ -270,11 +391,27 @@ def create_customer_interface(parent=None):
             table.setItem(row, 6, QTableWidgetItem(country))
 
             customer_name.clear()
+            customer_name.setError(False)
             email_input.clear()
+            email_input.setError(False)
             phone_input.clear()
+            phone_input.setError(False)
             street_input.clear()
             city_input.clear()
             country_input.clear()
+            country_input.setError(False)
+
+            InfoBar.success(
+                title=tr('success'),
+                content=f"Pomyślnie zarejestrowano klienta: {name} (ID: {customer_id})",
+                orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=3000, parent=widget
+            )
+        else:
+            InfoBar.error(
+                title=tr('error'),
+                content="Wystąpił błąd podczas zapisu klienta do bazy danych.",
+                orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
+            )
 
     def remove_customer():
         current_row = table.currentRow()
@@ -331,10 +468,10 @@ def create_settings_interface(parent=None):
 
     def change_language(index):
         lang_code = lang_combo.itemData(index)
-
         save_language(lang_code)
-
         msg = MessageBox(tr('settings'), tr('restart_req'), widget)
+        msg.cancelButton.hide()
+        msg.yesButton.setText('OK')
         msg.exec()
 
     lang_combo.currentIndexChanged.connect(change_language)
@@ -343,6 +480,32 @@ def create_settings_interface(parent=None):
     layout.addSpacing(30)
     layout.addWidget(lang_label)
     layout.addWidget(lang_combo)
+    layout.addSpacing(50)
+    info_title = SubtitleLabel(tr('app_info'))
+    layout.addWidget(info_title)
+    layout.addSpacing(10)
+    version_label = BodyLabel(f'{tr('version')} 1.0')
+    layout.addWidget(version_label)
+    layout.addSpacing(5)
+    repo_layout = QHBoxLayout()
+    repo_btn = HyperlinkButton("https://github.com/admJvsc/projekt-zabka-sklep/tree/main", f'📦 {tr('repo_on_gh')}')
+    repo_layout.addWidget(repo_btn)
+    repo_layout.addStretch(1)
+    layout.addLayout(repo_layout)
+    layout.addSpacing(20)
+    authors_title = CaptionLabel(f'{tr('authors')}:')
+    layout.addWidget(authors_title)
+    layout_authors = QHBoxLayout()
+    layout_authors.setContentsMargins(0, 0, 0, 0)
+    btn_author1 = HyperlinkButton("https://github.com/admJvsc", "admJvsc")
+    btn_author2 = HyperlinkButton("https://github.com/Kacperocik", "Kacperocik")
+    btn_author3 = HyperlinkButton("https://github.com/4PZ", "4PZ")
+    layout_authors.addWidget(btn_author1)
+    layout_authors.addWidget(btn_author2)
+    layout_authors.addWidget(btn_author3)
+    layout_authors.addStretch(1)
+    layout.addLayout(layout_authors)
+    layout.addSpacing(10)
     layout.addStretch(1)
 
     return widget
@@ -350,10 +513,14 @@ def create_settings_interface(parent=None):
 
 def create_main_window():
     """Initializes and returns the main MSFluentWindow"""
+    if os.name == 'nt':
+        myappid = 'frog_package'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
     window = MSFluentWindow()
     window.resize(950, 750)
-    window.setWindowTitle('Frog Package v1.0 — Żabka Online Admin')
-    window.setWindowIcon(FI.BASKETBALL.icon())
+    window.setWindowTitle(tr('app_title'))
+    window.setWindowIcon(QIcon(gl.ICON_FILE))
 
     product_interface = create_product_interface(window)
     customer_interface = create_customer_interface(window)

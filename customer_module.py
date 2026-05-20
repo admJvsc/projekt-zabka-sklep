@@ -67,17 +67,32 @@ def register_customer_in_db(name: str, email: str, phone: str, street: str, city
 
     return customer_id
 
-def process_purchase_in_db(customer_id: str, product_name: str, quantity: int) -> bool:
+def process_purchase_in_db(customer_id: str, product_name: str, quantity: int) -> int:
     customer_frame: pd.DataFrame = utils.customer_frame()
     normalized_customer_id: str = customer_id.strip()
 
     if not utils.has_customer(customer_frame, normalized_customer_id):
-        return False
+        return 1
 
-    purchase_completed: bool = product_module.purchase_product(product_name, quantity)
+    purchase_status: int = product_module.purchase_product(product_name, quantity)
 
-    if not purchase_completed:
-        return False
+    if purchase_status != 0:
+        return purchase_status
 
     update_customer(normalized_customer_id)
-    return True
+    return 0
+
+def remove_customer_from_db(customer_id: str):
+    customer_frame: pd.DataFrame = utils.customer_frame()
+    address_frame: pd.DataFrame = utils.address_frame()
+
+    normalized_id = customer_id.strip()
+
+    customer_mask = customer_frame["ID"].astype(str) != normalized_id
+    customer_frame = customer_frame[customer_mask]
+
+    address_mask = address_frame["ID"].astype(str) != normalized_id
+    address_frame = address_frame[address_mask]
+
+    utils.save_customer_frame(customer_frame)
+    utils.save_address_frame(address_frame)

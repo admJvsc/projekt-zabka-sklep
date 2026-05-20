@@ -1,4 +1,5 @@
 key,en,pl
+app_title,Frog Package v1.0 — Żabka Online App,Frog Package v1.0 — Aplikacja Żabka Online
 shop,Shop POS,Sprzedaż
 pos,Point of Sale,Punkt sprzedaży
 step1,Step 1: Identify Customer,Krok 1: Zidentyfikuj klienta
@@ -7,6 +8,12 @@ step2,Step 2: Select Items,Krok 2: Wybierz produkty
 step2_ph,Product Name,Nazwa Produktu
 step3,Step 3: Enter the quantity,Krok 3: Podaj ilość
 confirm_purch,Confirm Purchase,Potwierdź Zakup
+success,Success,Sukces
+error,Error,Błąd
+purchased,Purchased,Kupiono
+for,for,dla
+customer_id,Customer ID,Klient o ID
+not_found,not found,nie znaleziony
 products,Products,Produkty
 product_man,Product Management,Zarządzanie Produktami
 product_price,Product Price (PLN):,Cena Produktu (PLN):
@@ -27,3 +34,7 @@ reg_customer,Register Customer,Zarejestruj Klienta
 settings,Settings,Ustawienia
 select_lang,Select Application Language:,Wybierz język aplikacji:
 restart_req,"Please restart the application, to apply the language change.","Uruchom aplikację ponownie, aby zastosować zmianę języka."
+app_info,About,Informacje o aplikacji
+version,Version,Wersja
+repo_on_gh,Project repository on GitHub,Repozytorium projektu na GitHub
+authors,AUTHORS,AUTORZY
