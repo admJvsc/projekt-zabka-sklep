@@ -1,14 +1,14 @@
 """
-Moduł manager_baz_danych.py
+manager_baz_danych.py Module
 
-Funkcja: Obsługa dostarczonych plików bazy danych sklepu Żabka.
-Zgodność z kolumnami:
+Function: Handles the provided Żabka store database files.
+Compatible columns:
 - customer.csv (ID, NAME, E-MAIL, PHONE, CREATED, UPDATED)
 - address.csv (ID, STREET, CITY, COUNTRY)
 - products.xlsx (ID, PRODUCT, NO_PACKAGES_AVAILABLE, UPDATE)
 
-Paradygmat - funkcyjny
-Autor: Adam Jaszcz
+Paradigm - Functional
+Author: Adam Jaszcz
 """
 
 import os
@@ -18,16 +18,16 @@ from globals import *
 
 def init_databases():
     """
-        Sprawdza, czy struktura baz danych i folderów istnieje.
-        Jeśli pliki już są, nie modyfikuje ich zawartości.
+        Checks whether the database and folder structure exists.
+        If the files already exist, their contents are not modified.
     """
     if not os.path.exists(DB_DIR):
         os.makedirs(DB_DIR)
 
 def dodaj_produkt_do_bazy(prod_id, prod_nazwa, cena, liczba_opakowan, update_date=None):
     """
-        Dodaje nowy produkt do pliku Excel.
-        Kolumny: ID, NAME, PRICE, AMOUNT, UPDATED
+        Adds new product to the Excel file.
+        Columns: ID, NAME, PRICE, AMOUNT, UPDATED
     """
     init_databases()
     try:
@@ -38,13 +38,13 @@ def dodaj_produkt_do_bazy(prod_id, prod_nazwa, cena, liczba_opakowan, update_dat
         p_date = str(update_date) if update_date else datetime.now().strftime("%Y-%m-%d")
 
         if not p_id or not p_name:
-            print("[BŁĄD] ID oraz nazwa produktu nie mogą być puste.")
+            print("[ERR] ID and product's name cannot be empty.")
             return False
 
         df = pd.read_excel(PROD_FILE, dtype={"ID": str})
 
         if p_id in df["ID"].values:
-            print(f"[BŁĄD] Produkt o ID {p_id} już istnieje w bazie.")
+            print(f"[ERR] Product {p_id} already exists in the database.")
             return False
 
         nowy_wiersz = pd.DataFrame([{
@@ -57,23 +57,23 @@ def dodaj_produkt_do_bazy(prod_id, prod_nazwa, cena, liczba_opakowan, update_dat
 
         df = pd.concat([df, nowy_wiersz], ignore_index=True)
         df.to_excel(PROD_FILE, index=False)
-        print(f"[Baza] Pomyślnie dodano produkt: {p_name}")
+        print(f"[DBase] Product: {p_name} successfully added")
         return True
 
     except ValueError:
-        print("[BŁĄD] Niepoprawny format danych.")
+        print("[ERR] Incorrect data format.")
         return False
     except PermissionError:
-        print(f"[BŁĄD] Zamknij plik {PROD_FILE}. Jest otwarty w innym programie.")
+        print(f"[ERR] Close {PROD_FILE}. The file is opened in another program.")
         return False
     except Exception as e:
-        print(f"[BŁĄD] Wystąpił błąd: {e}")
+        print(f"[ERR] Error occured: {e}")
         return False
 
 
 def usun_produkt_z_bazy(search_value, search_by="ID"):
     """
-    Usuwa produkt z bazy na podstawie ID lub Nazwy towaru.
+    Removes the product from the database based on the ID or a product's name.
     """
     init_databases()
     try:
@@ -88,10 +88,10 @@ def usun_produkt_z_bazy(search_value, search_by="ID"):
         if not df[condition].empty:
             df_filtered = df[~condition]
             df_filtered.to_excel(PROD_FILE, index=False)
-            print(f"[Baza] Usunięto produkt dopasowany do {search_by}: {val}")
+            print(f"[DBase] Removed the product matching the {search_by}: {val}")
             return True
         else:
-            print(f"[Baza] Nie znaleziono produktu o {search_by}: {val}")
+            print(f"[DBase] Product that matches {search_by}: {val} not found")
             return False
 
     except PermissionError:
@@ -101,8 +101,9 @@ def usun_produkt_z_bazy(search_value, search_by="ID"):
 
 def metryka():
     """
-    Zlicza statystyki na podstawie plików.
-    Zwraca liczbę klientów, liczbę rodzajów produktów oraz sumę wszystkich opakowań.
+    Computes statistics based on files.
+    Returns the number of customers, the number of product types,
+    and the total number of packages.
     """
     init_databases()
     try:
@@ -110,10 +111,10 @@ def metryka():
         df_prod = pd.read_excel(PROD_FILE, dtype={"ID": str})
 
         metrics = {
-            "total_klientow": len(df_cust),
-            "total_typow_produktow": len(df_prod),
-            "total_przedmiotow_dostepnych": int(df_prod["NO_PACKAGES_AVAILABLE"].sum()) if not df_prod.empty else 0
+            "total_clients": len(df_cust),
+            "total_product_types": len(df_prod),
+            "total_available_products": int(df_prod["NO_PACKAGES_AVAILABLE"].sum()) if not df_prod.empty else 0
         }
         return metrics
     except Exception:
-        return {"total_klientow": 0, "total_typow_produktow": 0, "total_przedmiotow_dostepnych": 0}
+        return {"total_clients": 0, "total_product_types": 0, "total_available_products": 0}
