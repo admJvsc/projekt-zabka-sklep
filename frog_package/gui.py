@@ -3,9 +3,7 @@ import os
 import ctypes #for app icon in Windows taskbar
 import pandas as pd
 from frog_package import globals as gl
-from frog_package import product_module
-from frog_package import customer_module
-from frog_package import manager_baz_danych
+from frog_package import product_module, customer_module, manager_baz_danych
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTableWidgetItem
 from PySide6.QtSvgWidgets import QSvgWidget
@@ -550,3 +548,6 @@ def run_application():
     window = create_main_window()
     window.show()
     sys.exit(app.exec())
+
+if __name__ == "__main__":
+    run_application()

@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'PySide6',
-        'qfluentwidgets',
+        'PySide6-Fluent-Widgets',
         'pandas',
         'openpyxl'
     ],
