@@ -6,7 +6,6 @@ import globals as gl
 import manager_baz_danych
 import utils
 
-
 def product_frame() -> pd.DataFrame:
     manager_baz_danych.init_databases()
 
@@ -40,7 +39,7 @@ def get_all_products() -> list[tuple]:
 
     return records
 
-def purchase_product(product_name: str, quantity: int) -> int:
+def purchase_product(product_name: str, quantity: int, client_id: str) -> int:
     products_frame: pd.DataFrame = product_frame()
     normalized_name: str = product_name.strip().upper()
 
@@ -57,9 +56,25 @@ def purchase_product(product_name: str, quantity: int) -> int:
     products_frame.loc[row_mask, "AMOUNT"] = str(available_packages - quantity)
     products_frame.loc[row_mask, "UPDATED"] = utils.today()
 
+    folder_name: str = "zakupy"
+    
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+        
+    filename: str = f"zakup_klienta_{client_id}.txt"
+    file_path = os.path.join(folder_name, filename)
+    
+    try:
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(f"ID klienta: {client_id}\n")
+            file.write(f"Zakupiony produkt: {product_name.strip()}\n")
+            file.write(f"Ilosc: {quantity}\n")
+            file.write(f"Data zakupu: {utils.today()}\n")
+    except Exception as e:
+        print(f"Blad podczas generowania pliku tekstowego: {str(e)}")
+
     save_product_frame(products_frame)
     return 0
-
 
 def add_product_to_db(name: str, price: float, amount: int) -> tuple[str, str, str]:
     products_frame: pd.DataFrame = product_frame()

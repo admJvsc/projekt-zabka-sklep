@@ -9,7 +9,6 @@ class columns:
     address: list[str] = ["ID", "STREET", "CITY", "COUNTRY"]
     product: list[str] = ["ID", "NAME", "PRICE", "AMOUNT", "UPDATED"]
 
-
 def today() -> str:
     return date.today().isoformat()
 
