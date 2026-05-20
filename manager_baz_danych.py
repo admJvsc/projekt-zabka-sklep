@@ -8,7 +8,7 @@ Compatible columns:
 - products.xlsx (ID, PRODUCT, NO_PACKAGES_AVAILABLE, UPDATE)
 
 Paradigm - Functional
-Author: Adam Jaszcz
+Author: Adam Jaszcz.
 """
 
 import os
