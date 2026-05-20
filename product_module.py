@@ -33,8 +33,8 @@ def get_all_products() -> list[tuple]:
         records.append((
             str(row["ID"]).strip(),
             str(row["NAME"]).strip(),
-            str(row["PRICE"]).strip(),   # Dodana cena
-            str(row["AMOUNT"]).strip(),  # Zmienione na AMOUNT
+            str(row["PRICE"]).strip(),
+            str(row["AMOUNT"]).strip(),
             str(row["UPDATED"]).strip(),
         ))
 
