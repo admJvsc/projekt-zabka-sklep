@@ -22,10 +22,10 @@ fill_name_country,Please fill in the required fields: Full Name and Country.,Wyp
 missing_contact_info,Missing contact information,Brak danych kontaktowych
 provide_email_or_phone,Please provide at least your email address OR phone number.,Podaj przynajmniej e-mail LUB numer telefonu.
 incorrect_format,Incorrect format,Błędny format
-incorrect_email,The email address must include the ‘@’ symbol.,Adres e-mail musi zawierać znak '@'.
-reg_customer_cucces,This customer has been successfully registered,Pomyślnie zarejestrowano klienta
+incorrect_email,The email address must include the ‘@’ symbol.,Adres e-mail musi zawierać znak ‘@’.
+reg_customer_success,This customer has been successfully registered,Pomyślnie zarejestrowano klienta
 error_save_customer,An error occurred while saving the customer to the database.,Wystąpił błąd podczas zapisu klienta do bazy danych.
-incorrect_phone
+incorrect_phone,The phone number contains invalid characters.,Numer telefonu zawiera niedozwolone znaki.
 product,Product,Produkt
 products,Products,Produkty
 product_man,Product Management,Zarządzanie Produktami

@@ -17,7 +17,14 @@ from qfluentwidgets import FluentIcon as FI
 
 
 def load_language():
-    """Reads the language code from settings.csv. Defaults to 'en'."""
+    """Loads the active language code from the settings file.
+
+    Reads the ``language`` entry from ``settings.csv``. If the file is missing,
+    unreadable, or does not contain a language setting, English (``en``) is used.
+
+    Returns:
+        str: Two-letter language code, for example ``'en'`` or ``'pl'``.
+    """
     if os.path.exists(gl.SETT_FILE):
         try:
             df = pd.read_csv(gl.SETT_FILE, header=None)
@@ -29,14 +36,29 @@ def load_language():
     return 'en'
 
 def save_language(lang_code):
-    """Saves the selected language code to settings.csv."""
+    """Persists the selected language code to the settings file.
+
+    Overwrites ``settings.csv`` with a single ``language`` entry.
+
+    Args:
+        lang_code (str): Language code to save, for example ``'en'`` or ``'pl'``.
+    """
     df = pd.DataFrame([['language', lang_code]])
     df.to_csv(gl.SETT_FILE, index=False, header=False)
 
 CURRENT_LANG = load_language()
 
 def load_translations():
-    """Reads translations from translations.csv using pandas and builds the texts dictionary."""
+    """Loads UI translations from the translations CSV file.
+
+    Parses ``translations.csv`` and builds a nested dictionary keyed by language
+    code. Literal ``\\n`` sequences in cell values are converted to newline
+    characters. Missing or empty translations fall back to the translation key.
+
+    Returns:
+        dict[str, dict[str, str]]: Mapping of language codes (``'en'``, ``'pl'``)
+            to dictionaries of translation keys and localized strings.
+    """
     translations = {'en': {}, 'pl': {}}
 
     if os.path.exists(gl.LANG_FILE):
@@ -59,7 +81,19 @@ def load_translations():
 TEXTS = load_translations()
 
 def tr(key):
-    """Returns the text in the currently loaded language. Returns the key if not found."""
+    """Returns the localized string for a translation key.
+
+    Looks up ``key`` in the translations loaded for ``CURRENT_LANG``. If
+    ``CURRENT_LANG`` is not present in ``TEXTS``, the English dictionary is
+    used instead. If the key is not defined in the selected dictionary,
+    ``key`` is returned unchanged.
+
+    Args:
+        key (str): Translation key defined in ``translations.csv``.
+
+    Returns:
+        str: Localized text for the given key.
+    """
     return TEXTS.get(CURRENT_LANG, TEXTS['en']).get(key, key)
 
 
@@ -401,7 +435,7 @@ def create_customer_interface(parent=None):
 
             InfoBar.success(
                 title=tr('success'),
-                content=f"{tr('reg_customer_cucces')}: {name} (ID: {customer_id})",
+                content=f"{tr('reg_customer_success')}: {name} (ID: {customer_id})",
                 orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=3000, parent=widget
             )
         else:
