@@ -96,7 +96,38 @@ def tr(key):
     """
     return TEXTS.get(CURRENT_LANG, TEXTS['en']).get(key, key)
 
+def log_section_entry(func):
+    """Logs navigation when a decorated interface widget is shown.
 
+    Wraps a widget factory function and overrides the returned widget's
+    ``showEvent`` handler to print the widget's ``objectName()`` to the
+    console whenever the section becomes visible.
+
+    Args:
+        func (Callable[..., QWidget]): Factory function that creates and
+            returns a ``QWidget`` instance.
+
+    Returns:
+        Callable[..., QWidget]: Wrapped factory that returns the same widget
+            with a logging ``showEvent`` handler attached.
+    """
+
+    def wrapper(*args, **kwargs):
+        widget = func(*args, **kwargs)
+        original_show_event = widget.showEvent
+
+        def logged_show_event(event):
+            print(f"[NAV] Switched to: {widget.objectName()}")
+            original_show_event(event)
+
+        widget.showEvent = logged_show_event
+
+        return widget
+
+    return wrapper
+
+
+@log_section_entry
 def create_shopping_interface(parent=None):
     """Shopping module interface for customers"""
     widget = QWidget(parent)
@@ -180,6 +211,7 @@ def create_shopping_interface(parent=None):
     return widget
 
 
+@log_section_entry
 def create_product_interface(parent=None):
     """Product Management Interface"""
     widget = QWidget(parent)
@@ -293,6 +325,7 @@ def create_product_interface(parent=None):
     return widget
 
 
+@log_section_entry
 def create_customer_interface(parent=None):
     """Customer Management Interface"""
     widget = QWidget(parent)
@@ -479,6 +512,7 @@ def create_customer_interface(parent=None):
     return widget
 
 
+@log_section_entry
 def create_settings_interface(parent=None):
     """Application Settings Interface"""
     widget = QWidget(parent)
