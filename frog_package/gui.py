@@ -113,17 +113,17 @@ def create_shopping_interface(parent=None):
                 qty_input.setValue(1)
             elif status == 1:
                 InfoBar.error(
-                    title=tr('error'), content=f"Nie znaleziono klienta o ID: {cid}",
+                    title=tr('error'), content=f"{tr('customer_not_found')}: {cid}",
                     orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
                 )
             elif status == 2:
                 InfoBar.error(
-                    title=tr('error'), content=f"Produkt '{prod}' nie istnieje w bazie!",
+                    title=tr('error'), content=f"{tr('product')} '{prod}' {tr('not_exists_in_base')}!",
                     orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
                 )
             elif status == 3:
                 InfoBar.error(
-                    title=tr('error'), content=f"Brak wystarczającej ilości towaru '{prod}'!",
+                    title=tr('error'), content=f"{tr('insufficient_stoct')} '{prod}'!",
                     orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
                 )
 
@@ -212,12 +212,12 @@ def create_product_interface(parent=None):
                 amount_input.setValue(100)
 
                 InfoBar.success(
-                    title=tr('success'), content=f"Dodano produkt: {name}",
+                    title=tr('success'), content=f"{tr('added_product')}: {name}",
                     orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=3000, parent=widget
                 )
             else:
                 InfoBar.error(
-                    title=tr('error'), content="Nie udało się dodać produktu. Sprawdź plik bazy.",
+                    title=tr('error'), content=tr('error_add_product'),
                     orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
                 )
 
@@ -337,8 +337,8 @@ def create_customer_interface(parent=None):
                 country_input.setError(True)
 
             InfoBar.warning(
-                title="Brakujące dane",
-                content="Wypełnij wymagane pola: Imię i nazwisko oraz Państwo.",
+                title=tr('missing_data'),
+                content=tr('fill_name_country'),
                 orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
             )
             return
@@ -347,8 +347,8 @@ def create_customer_interface(parent=None):
             email_input.setError(True)
             phone_input.setError(True)
             InfoBar.warning(
-                title="Brak danych kontaktowych",
-                content="Podaj przynajmniej e-mail LUB numer telefonu.",
+                title=tr('missing_contact_info'),
+                content=tr('provide_email_or_phone'),
                 orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
             )
             return
@@ -357,8 +357,8 @@ def create_customer_interface(parent=None):
             email_input.setError(True)
             email_input.setFocus()
             InfoBar.error(
-                title="Błędny format",
-                content="Adres e-mail musi zawierać znak '@'.",
+                title=tr('incorrect_format'),
+                content=tr('incorrect_email'),
                 orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
             )
             return
@@ -369,8 +369,8 @@ def create_customer_interface(parent=None):
                 phone_input.setError(True)
                 phone_input.setFocus()
                 InfoBar.error(
-                    title="Błędny format",
-                    content="Numer telefonu zawiera niedozwolone znaki.",
+                    title=tr('incorrect_format'),
+                    content=tr('incorrect_phone'),
                     orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=4500, parent=widget
                 )
                 return
@@ -401,13 +401,13 @@ def create_customer_interface(parent=None):
 
             InfoBar.success(
                 title=tr('success'),
-                content=f"Pomyślnie zarejestrowano klienta: {name} (ID: {customer_id})",
+                content=f"{tr('reg_customer_cucces')}: {name} (ID: {customer_id})",
                 orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=3000, parent=widget
             )
         else:
             InfoBar.error(
                 title=tr('error'),
-                content="Wystąpił błąd podczas zapisu klienta do bazy danych.",
+                content=tr('error_save_customer'),
                 orient=Qt.Horizontal, isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=widget
             )
 

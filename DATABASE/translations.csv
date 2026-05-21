@@ -12,8 +12,21 @@ success,Success,Sukces
 error,Error,Błąd
 purchased,Purchased,Kupiono
 for,for,dla
-customer_id,Customer ID,Klient o ID
-not_found,not found,nie znaleziony
+customer_not_found,No client with that ID was found,Nie znaleziono klienta o ID
+not_exists_in_base,does not exist in the database,nie istnieje w bazie
+insufficient_stoct,Insufficient stock of product,Brak wystarczającej ilości towaru
+added_product,Added product,Dodano produkt
+error_add_product,The product could not be added. Please check the database file.,Nie udało się dodać produktu. Sprawdź plik bazy.
+missing_data,Missing data,Brakujące dane
+fill_name_country,Please fill in the required fields: Full Name and Country.,Wypełnij wymagane pola: Imię i nazwisko oraz Państwo.
+missing_contact_info,Missing contact information,Brak danych kontaktowych
+provide_email_or_phone,Please provide at least your email address OR phone number.,Podaj przynajmniej e-mail LUB numer telefonu.
+incorrect_format,Incorrect format,Błędny format
+incorrect_email,The email address must include the ‘@’ symbol.,Adres e-mail musi zawierać znak '@'.
+reg_customer_cucces,This customer has been successfully registered,Pomyślnie zarejestrowano klienta
+error_save_customer,An error occurred while saving the customer to the database.,Wystąpił błąd podczas zapisu klienta do bazy danych.
+incorrect_phone
+product,Product,Produkt
 products,Products,Produkty
 product_man,Product Management,Zarządzanie Produktami
 product_price,Product Price (PLN):,Cena Produktu (PLN):
